@@ -1,193 +1,82 @@
 import requests
-
 import json
-
 import time
 
 def api_validator(url, method, headers=None, payload=None, expected_status=None):
 
     result = {
-
         "request": {
-
             "url": url,
-
-            "method": method.upper(),
-
+            "method": method.lower(),
             "headers": headers if headers else {},
-
             "payload": payload,
-
             "expected_status_code": expected_status
-
         },
-
         "response": {},
-
         "result": ""
-
     }
 
     try:
-
-        # Start time
-
+        # start time
         start_time = time.time()
 
-        # Select method
+        # select method
+        method = method.lower()
 
-        method = method.upper()
-
-        if method == "GET":
-
+        if method == "get":
             response = requests.get(url, headers=headers)
-
-        elif method == "POST":
-
+        elif method == "post":
             response = requests.post(url, headers=headers, json=payload)
-
-        elif method == "PUT":
-
+        elif method == "put":
             response = requests.put(url, headers=headers, json=payload)
-
-        elif method == "PATCH":
-
+        elif method == "patch":
             response = requests.patch(url, headers=headers, json=payload)
-
-        elif method == "DELETE":
-
+        elif method == "delete":
             response = requests.delete(url, headers=headers)
-
         else:
-
-            result["result"] = f"FAIL - Unsupported HTTP method: {method}"
-
+            result["result"] = f"fail - unsupported http method: {method}"
             return result
 
-        # Response time
-
+        # response time
         response_time = round((time.time() - start_time) * 1000, 2)
 
-        # Capture response data
-
+        # capture response data
         try:
-
             response_body = response.json()
-
         except ValueError:
-
             response_body = response.text
 
         result["response"] = {
-
             "actual_status_code": response.status_code,
-
             "response_body": response_body,
-
             "response_headers": dict(response.headers),
-
             "response_time_ms": response_time
-
         }
 
-        # Compare status
-
+        # compare status
         if expected_status is not None:
-
             if response.status_code == expected_status:
-
-                result["result"] = "PASS"
-
+                result["result"] = "pass"
             else:
-
-                result["result"] = f"FAIL - Expected {expected_status}, got {response.status_code}"
-
+                result["result"] = f"fail - expected {expected_status}, got {response.status_code}"
         else:
-
-            result["result"] = "PASS (No expected status provided)"
+            result["result"] = "pass (no expected status provided)"
 
     except Exception as e:
-
-        result["result"] = f"ERROR - {str(e)}"
+        result["result"] = f"error - {str(e)}"
 
     return result
 
 
 # -----------------------------
-
-# Example Usage
-
+# example usage
 # -----------------------------
-
 if __name__ == "__main__":
-
     url = "https://jsonplaceholder.typicode.com/posts"
-
-    method = "POST"
-
-    headers = {"Content-Type": "application/json"}
-
+    method = "post"
+    headers = {"content-type": "application/json"}
     payload = {"title": "foo", "body": "bar", "userId": 1}
-
     expected_status = 201
 
     output = api_validator(url, method, headers, payload, expected_status)
-
     print(json.dumps(output, indent=4))
- 
-
-
-{
-
-  "request": {
-
-    "url": "https://api.example.com/users",
-
-    "method": "POST",
-
-    "headers": {
-
-      "Content-Type": "application/json",
-
-      "Authorization": "Bearer xyz123"
-
-    },
-
-    "payload": {
-
-      "name": "John",
-
-      "email": "john@example.com"
-
-    },
-
-    "expected_status_code": 201
-
-  },
-
-  "response": {
-
-    "actual_status_code": 201,
-
-    "response_body": {
-
-      "id": 45,
-
-      "name": "John"
-
-    },
-
-    "response_headers": {
-
-      "Content-Type": "application/json"
-
-    },
-
-    "response_time_ms": 118
-
-  },
-
-  "result": "PASS"
-
-}
- 
